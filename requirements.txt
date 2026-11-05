@@ -1,3 +1,4 @@
+sentence-transformers
 chromadb
 groq
 groq==0.18.0
