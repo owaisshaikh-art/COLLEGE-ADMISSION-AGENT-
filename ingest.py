@@ -67,11 +67,22 @@ def ingest_documents(pdf_paths=None):
     """Extract, chunk, embed and store PDFs in persistent ChromaDB."""
     DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
     if pdf_paths is None:
-        pdf_paths = sorted(DOCUMENTS_DIR.glob("*.pdf"))
+        # PDFs committed at the repository root (for example, on Streamlit
+        # Cloud) and PDFs uploaded to the documents folder are both supported.
+        search_dirs = (BASE_DIR, DOCUMENTS_DIR)
+        pdf_paths = sorted(
+            (
+                path
+                for directory in search_dirs
+                for path in directory.iterdir()
+                if path.is_file() and path.suffix.lower() == ".pdf"
+            ),
+            key=lambda path: str(path).lower()
+        )
 
     if not pdf_paths:
         raise ValueError(
-            f"No PDF files found. Add PDFs to: {DOCUMENTS_DIR}"
+            f"No PDF files found. Add PDFs to the repository root or: {DOCUMENTS_DIR}"
         )
 
     collection = get_collection()
